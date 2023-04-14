@@ -44,8 +44,6 @@ contract Vote {
     mapping(uint256 => VoteInfo) public voteInfoMap;
     // 投票自增id
     uint256 voteIndex;
-    // 委托信息 mapping(VoteInfo.id => mapping(委托人 => 被委托人))
-    mapping(uint256 => mapping(address => address)) public delegateMap;
     // 质押以太获取token的比值
     uint8 immutable ratio;
     // 持有token
@@ -63,10 +61,8 @@ contract Vote {
     event TokenLog(uint8 tag, address indexed addr, uint256 value);
     // 创建投票事件
     event Create(uint256 indexed voteId, string indexed title);
-    // 委托事件
-    event Approve(uint256 indexed voteId, address indexed principal, address indexed respondent);
-    // 撤销委托事件
-    event Revoke(uint256 indexed voteId, address indexed principal, address indexed respondent);
+    // 投票开始事件
+    event Start(uint256 indexed voteId, string indexed title);
 
     constructor(uint8 _ratio) {
         ratio = _ratio;
@@ -141,6 +137,7 @@ contract Vote {
         voteInfo.voteLimit = _voteLimit;
         voteInfo.allocationAddrs = _allocationAddrs;
         voteInfo.started = false;
+        emit Create(voteIndex, _title);
         return voteIndex++;
     }
 
@@ -172,6 +169,7 @@ contract Vote {
         require(voteInfo.topicIndex > 0, "vote not topic");
         voteInfo.deadline = voteInfo.duration == 0 ? 0 : block.timestamp + voteInfo.duration;
         voteInfo.started = true;
+        emit Create(_voteInfoId, voteInfo.title);
     }
 
     // 投票
